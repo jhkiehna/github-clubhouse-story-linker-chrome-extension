@@ -16,5 +16,6 @@
   "background": {
     "scripts": ["js/api.js"],
     "persistent": false
-  }
+  },
+  "permissions": ["https://api.clubhouse.io/", "https://github.com/"]
 }

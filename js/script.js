@@ -5,17 +5,48 @@ buttonContainer.setAttribute(
   "position: relative; width: 100%; padding-bottom: 0.5em;"
 );
 
-var clearSearch = () => {
-  let previousResults = document.querySelector("#search-results-container");
-  if (previousResults) {
-    previousResults.parentNode.removeChild(previousResults);
-  }
+var pasteResult = event => {
+  console.log("link clicked");
+  console.log(event.target);
+
+  let textArea = document.querySelector("#pull_request_body");
+  textArea.value += " [" + event.target.getAttribute("id") + "]";
 };
 
-var search = () => {
-  let previousResults = document.querySelector("#search-results-container");
-  if (previousResults) {
-    previousResults.parentNode.removeChild(previousResults);
+var clearSearch = () => {
+  setTimeout(() => {
+    while (
+      document.querySelector("#search-results-container") &&
+      document
+        .querySelector("#search-results-container")
+        .parentNode.hasChildNodes()
+    ) {
+      document
+        .querySelector("#search-results-container")
+        .parentNode.removeChild(
+          document.querySelector("#search-results-container").parentNode
+            .lastChild
+        );
+    }
+  }, 300);
+};
+
+var search = event => {
+  if (event.keyCode != 13) {
+    return;
+  }
+
+  while (
+    document.querySelector("#search-results-container") &&
+    document
+      .querySelector("#search-results-container")
+      .parentNode.hasChildNodes()
+  ) {
+    document
+      .querySelector("#search-results-container")
+      .parentNode.removeChild(
+        document.querySelector("#search-results-container").parentNode.lastChild
+      );
   }
 
   let searchInput = document.querySelector("#search-input-box");
@@ -42,11 +73,27 @@ var search = () => {
   if (inputValue) {
     chrome.runtime.sendMessage(
       { contentScriptQuery: "fetchStories", queryString: inputValue },
-      response => console.log(response)
-    );
+      response => {
+        console.log(response);
+        response.data.forEach((story, index) => {
+          if (index <= 10) {
+            console.log(story.name);
+            let element = document.createElement("a");
+            let divider = document.createElement("hr");
+            element.setAttribute("style", "cursor: pointer");
+            element.setAttribute("id", `ch${story.id}`);
+            element.addEventListener("click", pasteResult);
 
-    resultsContainer.innerHTML = inputValue;
-    searchInput.parentNode.appendChild(resultsContainer);
+            element.innerText = story.name;
+
+            resultsContainer.appendChild(element);
+            resultsContainer.appendChild(divider);
+          }
+        });
+
+        searchInput.parentNode.appendChild(resultsContainer);
+      }
+    );
   }
 };
 
@@ -68,7 +115,7 @@ var displaySearch = () => {
   searchInput.focus();
 
   searchInput.addEventListener("blur", clearSearch, false);
-  searchInput.addEventListener("keyup", search, false);
+  searchInput.addEventListener("keypress", search, false);
 
   let button = document.querySelector("#clubhouse-search-button");
   button.parentNode.removeChild(button);
