@@ -1,4 +1,3 @@
-console.log("matches");
 let buttonContainer = document.createElement("div");
 buttonContainer.setAttribute("id", "clubhouse-button-container");
 buttonContainer.setAttribute(
@@ -19,10 +18,8 @@ var search = () => {
     previousResults.parentNode.removeChild(previousResults);
   }
 
-  //set interval to send api request in this function, reset counter on interval everytime
-  //this function is re-fired
   let searchInput = document.querySelector("#search-input-box");
-  let value = searchInput.value;
+  let inputValue = searchInput.value;
 
   let resultsContainer = document.createElement("div");
   resultsContainer.setAttribute("id", "search-results-container");
@@ -42,8 +39,13 @@ var search = () => {
     `
   );
 
-  if (value) {
-    resultsContainer.innerHTML = value;
+  if (inputValue) {
+    chrome.runtime.sendMessage(
+      { contentScriptQuery: "fetchStories", queryString: inputValue },
+      response => console.log(response)
+    );
+
+    resultsContainer.innerHTML = inputValue;
     searchInput.parentNode.appendChild(resultsContainer);
   }
 };
@@ -67,6 +69,9 @@ var displaySearch = () => {
 
   searchInput.addEventListener("blur", clearSearch, false);
   searchInput.addEventListener("keyup", search, false);
+
+  let button = document.querySelector("#clubhouse-search-button");
+  button.parentNode.removeChild(button);
 };
 
 function injectButton(prTextArea, buttonContainer, interval) {

@@ -12,5 +12,9 @@
       "matches": ["https://github.com/*/*/compare*"],
       "js": ["js/script.js"]
     }
-  ]
+  ],
+  "background": {
+    "scripts": ["js/api.js"],
+    "persistent": false
+  }
 }
