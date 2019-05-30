@@ -101,7 +101,7 @@ var search = event => {
                 let divider = document.createElement("hr");
                 element.setAttribute("style", "cursor: pointer");
                 element.setAttribute("id", `ch${story.id}`);
-                element.addEventListener("click", pasteResult);
+                element.addEventListener("click", pasteResult, false);
 
                 element.innerText = story.name + " - " + response.name;
 
@@ -135,7 +135,7 @@ var injectButton = () => {
 
   if (commentTextArea) {
     commentTextArea.parentNode.insertBefore(buttonContainer, commentTextArea);
-    searchButton.addEventListener("click", displaySearchField);
+    searchButton.addEventListener("click", displaySearchField, false);
   }
 };
 
@@ -147,8 +147,12 @@ var injectButton = () => {
  * Alternatively, use `onAjaxedPagesRaw` if your callback needs to be called at every page
  * change (e.g. to "unmount" a feature / listener) regardless of of *newness* of the page.
  */
-document.addEventListener("pjax:end", () => {
-  injectButton();
-});
+document.addEventListener(
+  "pjax:end",
+  () => {
+    injectButton();
+  },
+  false
+);
 
 injectButton();
