@@ -9,7 +9,6 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     fetch(url)
       .then(res => res.json())
       .then(json => {
-        console.log(JSON.stringify(json));
         sendResponse(json);
       })
       .then(json => sendResponse(json))

@@ -9,7 +9,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://github.com/*/*/compare*"],
+      "matches": ["https://github.com/*/*/pull/*"],
       "js": ["js/script.js"]
     }
   ],
@@ -17,5 +17,5 @@
     "scripts": ["js/api.js"],
     "persistent": false
   },
-  "permissions": ["https://api.clubhouse.io/", "https://github.com/"]
+  "permissions": ["storage", "https://api.clubhouse.io/", "https://github.com/"]
 }
