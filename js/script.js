@@ -130,6 +130,15 @@ var displaySearchField = () => {
   searchButton.parentNode.removeChild(searchButton);
 };
 
+var injectButton = () => {
+  let commentTextArea = document.querySelector("#new_comment_field");
+
+  if (commentTextArea) {
+    commentTextArea.parentNode.insertBefore(buttonContainer, commentTextArea);
+    searchButton.addEventListener("click", displaySearchField);
+  }
+};
+
 /*
  * When navigating back and forth in history, GitHub will preserve the DOM changes;
  * This means that the old features will still be on the page and don't need to re-run.
@@ -139,17 +148,7 @@ var displaySearchField = () => {
  * change (e.g. to "unmount" a feature / listener) regardless of of *newness* of the page.
  */
 document.addEventListener("pjax:end", () => {
-  let commentTextArea = document.querySelector("#new_comment_field");
-
-  if (commentTextArea) {
-    commentTextArea.parentNode.insertBefore(buttonContainer, commentTextArea);
-    searchButton.addEventListener("click", displaySearchField);
-  }
+  injectButton();
 });
 
-let commentTextArea = document.querySelector("#new_comment_field");
-
-if (commentTextArea) {
-  commentTextArea.parentNode.insertBefore(buttonContainer, commentTextArea);
-  searchButton.addEventListener("click", displaySearchField);
-}
+injectButton();
