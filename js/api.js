@@ -1,18 +1,41 @@
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  $CLUBHOUSE_API = "https://api.clubhouse.io/api/v2";
+
   if (request.contentScriptQuery == "fetchStories") {
     chrome.storage.sync.get(["clubhouseToken"], item => {
       $CLUBHOUSE_API_TOKEN = item.clubhouseToken;
 
-      var url = `https://api.clubhouse.io/api/v2/search/stories?token=${$CLUBHOUSE_API_TOKEN}&query=${
-        request.queryString
-      }`;
-
-      fetch(url)
+      fetch(
+        `${$CLUBHOUSE_API}/search/stories?token=${$CLUBHOUSE_API_TOKEN}&query=${
+          request.searchTerm
+        }`
+      )
         .then(res => res.json())
         .then(json => {
           sendResponse(json);
         })
-        .then(json => sendResponse(json))
+        .catch(error => {
+          console.log(error);
+          sendResponse(error);
+        });
+    });
+
+    return true;
+  }
+
+  if (request.contentScriptQuery == "fetchProject") {
+    chrome.storage.sync.get(["clubhouseToken"], item => {
+      $CLUBHOUSE_API_TOKEN = item.clubhouseToken;
+
+      fetch(
+        `${$CLUBHOUSE_API}/projects/${
+          request.projectId
+        }?token=${$CLUBHOUSE_API_TOKEN}`
+      )
+        .then(res => res.json())
+        .then(json => {
+          sendResponse(json);
+        })
         .catch(error => {
           console.log(error);
           sendResponse(error);

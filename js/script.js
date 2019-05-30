@@ -1,5 +1,3 @@
-console.log("matched");
-
 let buttonContainer = document.createElement("div");
 buttonContainer.setAttribute("id", "clubhouse-button-container");
 buttonContainer.setAttribute(
@@ -73,7 +71,7 @@ var search = event => {
     position: absolute;
     bottom: 3em;
     z-index: 9999;
-    width: 300px;
+    width: 500px;
     min-height: 20px;
     background-color: #fff;
     border: 1px solid #333;
@@ -87,21 +85,30 @@ var search = event => {
 
   if (searchTerm) {
     chrome.runtime.sendMessage(
-      { contentScriptQuery: "fetchStories", queryString: searchTerm },
+      { contentScriptQuery: "fetchStories", searchTerm: searchTerm },
       response => {
-        console.log(response);
         response.data.forEach((story, index) => {
           if (index <= 10) {
-            let element = document.createElement("a");
-            let divider = document.createElement("hr");
-            element.setAttribute("style", "cursor: pointer");
-            element.setAttribute("id", `ch${story.id}`);
-            element.addEventListener("click", pasteResult);
+            chrome.runtime.sendMessage(
+              {
+                contentScriptQuery: "fetchProject",
+                projectId: story.project_id
+              },
+              response => {
+                let element = document.createElement("a");
+                let divider = document.createElement("hr");
+                element.setAttribute("style", "cursor: pointer");
+                element.setAttribute("id", `ch${story.id}`);
+                element.addEventListener("click", pasteResult);
 
-            element.innerText = story.name;
+                element.innerText = story.name + " - " + response.name;
 
-            resultsContainer.appendChild(element);
-            resultsContainer.appendChild(divider);
+                resultsContainer.appendChild(element);
+                resultsContainer.appendChild(divider);
+
+                searchInput.parentNode.appendChild(resultsContainer);
+              }
+            );
           }
         });
 
@@ -122,14 +129,12 @@ var displaySearchField = () => {
 };
 
 var interval = setInterval(() => {
-  console.log(interval);
   let commentTextArea = document.querySelector("#new_comment_field");
 
   if (commentTextArea) {
-    console.log("comment field found");
     commentTextArea.parentNode.insertBefore(buttonContainer, commentTextArea);
     searchButton.addEventListener("click", displaySearchField);
 
     clearInterval(interval);
   }
-}, 1000);
+}, 2000);
