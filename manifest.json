@@ -10,10 +10,9 @@
   "content_scripts": [
     {
       "matches": [
-        "https://github.com/*/pull/*",
-        "https://github.com/*/pulls*",
-        "https://github.com/*/pulls",
-        "https://github.com/pulls*"
+        "https://github.com/*",
+        "https://github.com/*/pull*",
+        "https://github.com/*/pull/*"
       ],
       "js": ["js/script.js"],
       "match_about_blank": true

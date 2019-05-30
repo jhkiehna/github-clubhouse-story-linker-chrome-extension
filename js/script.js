@@ -1,3 +1,5 @@
+console.log("script running");
+
 let buttonContainer = document.createElement("div");
 buttonContainer.setAttribute("id", "clubhouse-button-container");
 buttonContainer.setAttribute(
@@ -128,13 +130,18 @@ var displaySearchField = () => {
   searchButton.parentNode.removeChild(searchButton);
 };
 
-var interval = setInterval(() => {
+document.addEventListener("pjax:end", () => {
   let commentTextArea = document.querySelector("#new_comment_field");
 
   if (commentTextArea) {
     commentTextArea.parentNode.insertBefore(buttonContainer, commentTextArea);
     searchButton.addEventListener("click", displaySearchField);
-
-    clearInterval(interval);
   }
-}, 2000);
+});
+
+let commentTextArea = document.querySelector("#new_comment_field");
+
+if (commentTextArea) {
+  commentTextArea.parentNode.insertBefore(buttonContainer, commentTextArea);
+  searchButton.addEventListener("click", displaySearchField);
+}
