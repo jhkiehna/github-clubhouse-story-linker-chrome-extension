@@ -9,8 +9,9 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://github.com/*/*/pull/*"],
-      "js": ["js/script.js"]
+      "matches": ["https://github.com/*/pull/*", "https://github.com/*/pulls*"],
+      "js": ["js/script.js"],
+      "match_about_blank": true
     }
   ],
   "background": {

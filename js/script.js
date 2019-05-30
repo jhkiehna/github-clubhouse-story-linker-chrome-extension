@@ -1,3 +1,5 @@
+console.log("matched");
+
 let buttonContainer = document.createElement("div");
 buttonContainer.setAttribute("id", "clubhouse-button-container");
 buttonContainer.setAttribute(
@@ -32,6 +34,10 @@ searchInput.setAttribute(
 var pasteResult = event => {
   let textArea = document.querySelector("#new_comment_field");
   textArea.value = "[" + event.target.getAttribute("id") + "]";
+
+  document
+    .querySelector("#partial-new-comment-form-actions button")
+    .removeAttribute("disabled");
 };
 
 var clearSearch = () => {
@@ -116,9 +122,11 @@ var displaySearchField = () => {
 };
 
 var interval = setInterval(() => {
+  console.log(interval);
   let commentTextArea = document.querySelector("#new_comment_field");
 
   if (commentTextArea) {
+    console.log("comment field found");
     commentTextArea.parentNode.insertBefore(buttonContainer, commentTextArea);
     searchButton.addEventListener("click", displaySearchField);
 
