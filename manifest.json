@@ -12,7 +12,8 @@
       "matches": [
         "https://github.com/*",
         "https://github.com/*/pull*",
-        "https://github.com/*/pull/*"
+        "https://github.com/*/pull/*",
+        "https://github.com/*/compare/*"
       ],
       "js": ["js/script.js"],
       "match_about_blank": true

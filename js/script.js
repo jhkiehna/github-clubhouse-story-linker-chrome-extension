@@ -131,10 +131,12 @@ var displaySearchField = () => {
 };
 
 var injectButton = () => {
-  let commentTextArea = document.querySelector("#new_comment_field");
+  let targetTextArea =
+    document.querySelector("#new_comment_field") ||
+    document.querySelector("#pull_request_body");
 
-  if (commentTextArea) {
-    commentTextArea.parentNode.insertBefore(buttonContainer, commentTextArea);
+  if (targetTextArea) {
+    targetTextArea.parentNode.insertBefore(buttonContainer, targetTextArea);
     searchButton.addEventListener("click", displaySearchField, false);
   }
 };
