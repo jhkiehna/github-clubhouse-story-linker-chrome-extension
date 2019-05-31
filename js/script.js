@@ -1,5 +1,3 @@
-console.log("script running");
-
 let buttonContainer = document.createElement("div");
 buttonContainer.setAttribute("id", "clubhouse-button-container");
 buttonContainer.setAttribute(
@@ -26,18 +24,25 @@ buttonContainer.appendChild(searchButton);
 let searchInput = document.createElement("input");
 searchInput.setAttribute("id", "search-input-box");
 searchInput.setAttribute("type", "text");
+searchInput.setAttribute("placeholder", "Type a search query...");
 searchInput.setAttribute(
   "style",
   "border-radius: 5px; width: 100%; margin-top: 0.5em; margin-bottom: 0.5em; padding: 0.25em 1em;"
 );
 
 var pasteResult = event => {
-  let textArea = document.querySelector("#new_comment_field");
-  textArea.value = "[" + event.target.getAttribute("id") + "]";
+  let targetTextArea =
+    document.querySelector("#new_comment_field") ||
+    document.querySelector("#pull_request_body");
 
-  document
-    .querySelector("#partial-new-comment-form-actions button")
-    .removeAttribute("disabled");
+  if (targetTextArea) {
+    targetTextArea.value = "[" + event.target.getAttribute("id") + "]";
+    document
+      .querySelector("#partial-new-comment-form-actions button")
+      .removeAttribute("disabled");
+  } else {
+    console.log("Can't find text area");
+  }
 };
 
 var clearSearch = () => {
