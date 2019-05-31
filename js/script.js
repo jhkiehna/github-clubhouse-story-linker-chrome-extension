@@ -89,29 +89,27 @@ var search = event => {
     chrome.runtime.sendMessage(
       { contentScriptQuery: "fetchStories", searchTerm: searchTerm },
       response => {
-        response.data.forEach((story, index) => {
-          if (index <= 10) {
-            chrome.runtime.sendMessage(
-              {
-                contentScriptQuery: "fetchProject",
-                projectId: story.project_id
-              },
-              response => {
-                let element = document.createElement("a");
-                let divider = document.createElement("hr");
-                element.setAttribute("style", "cursor: pointer");
-                element.setAttribute("id", `ch${story.id}`);
-                element.addEventListener("click", pasteResult, false);
+        response.data.slice(0, 10).forEach(story => {
+          chrome.runtime.sendMessage(
+            {
+              contentScriptQuery: "fetchProject",
+              projectId: story.project_id
+            },
+            response => {
+              let element = document.createElement("a");
+              let divider = document.createElement("hr");
+              element.setAttribute("style", "cursor: pointer");
+              element.setAttribute("id", `ch${story.id}`);
+              element.addEventListener("click", pasteResult, false);
 
-                element.innerText = story.name + " - " + response.name;
+              element.innerText = story.name + " - " + response.name;
 
-                resultsContainer.appendChild(element);
-                resultsContainer.appendChild(divider);
+              resultsContainer.appendChild(element);
+              resultsContainer.appendChild(divider);
 
-                searchInput.parentNode.appendChild(resultsContainer);
-              }
-            );
-          }
+              searchInput.parentNode.appendChild(resultsContainer);
+            }
+          );
         });
 
         searchInput.parentNode.appendChild(resultsContainer);
