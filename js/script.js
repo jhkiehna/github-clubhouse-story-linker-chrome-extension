@@ -24,10 +24,17 @@ buttonContainer.appendChild(searchButton);
 let searchInput = document.createElement("input");
 searchInput.setAttribute("id", "search-input-box");
 searchInput.setAttribute("type", "text");
-searchInput.setAttribute("placeholder", "Type a search query...");
+searchInput.setAttribute("placeholder", "Search for clubhouse story");
 searchInput.setAttribute(
   "style",
-  "border-radius: 5px; width: 100%; margin-top: 0.5em; margin-bottom: 0.5em; padding: 0.25em 1em;"
+  `border-radius: 3px;
+  border: 1px solid #d1d5da;
+  box-shadow: inset 0 1px 2px rgba(27,31,35,.075);
+  width: 100%;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  padding: 0.25em 1em;
+  background-color: #fafbfc`
 );
 
 var pasteResult = event => {
