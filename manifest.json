@@ -16,6 +16,7 @@
         "https://github.com/*/compare/*"
       ],
       "js": ["js/script.js"],
+      "css": ["styles/script.css"],
       "match_about_blank": true
     }
   ],

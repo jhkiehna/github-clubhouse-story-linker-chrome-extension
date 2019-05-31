@@ -1,23 +1,9 @@
 let buttonContainer = document.createElement("div");
 buttonContainer.setAttribute("id", "clubhouse-button-container");
-buttonContainer.setAttribute(
-  "style",
-  "position: relative; width: 100%; padding-bottom: 0.5em;"
-);
 
 let searchButton = document.createElement("button");
 searchButton.setAttribute("type", "button");
 searchButton.setAttribute("id", "clubhouse-search-button");
-searchButton.setAttribute(
-  "style",
-  `display: block;
-  padding: 1em 2em;
-  border-radius: 5px;
-  margin-left: auto;
-  margin-right: auto;
-  color: #fff;
-  background-color: #463460;`
-);
 searchButton.innerText = "Search for Clubhouse Issues";
 buttonContainer.appendChild(searchButton);
 
@@ -25,17 +11,6 @@ let searchInput = document.createElement("input");
 searchInput.setAttribute("id", "search-input-box");
 searchInput.setAttribute("type", "text");
 searchInput.setAttribute("placeholder", "Search for clubhouse story");
-searchInput.setAttribute(
-  "style",
-  `border-radius: 3px;
-  border: 1px solid #d1d5da;
-  box-shadow: inset 0 1px 2px rgba(27,31,35,.075);
-  width: 100%;
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
-  padding: 0.25em 1em;
-  background-color: #fafbfc`
-);
 
 var pasteResult = event => {
   let targetTextArea =
@@ -52,23 +27,7 @@ var pasteResult = event => {
   }
 };
 
-var clearSearch = () => {
-  setTimeout(() => {
-    while (document.querySelector("#search-results-container")) {
-      document
-        .querySelector("#search-results-container")
-        .parentNode.removeChild(
-          document.querySelector("#search-results-container")
-        );
-    }
-  }, 300);
-};
-
-var search = event => {
-  if (event.keyCode != 13) {
-    return;
-  }
-
+function clearResults() {
   while (document.querySelector("#search-results-container")) {
     document
       .querySelector("#search-results-container")
@@ -76,24 +35,21 @@ var search = event => {
         document.querySelector("#search-results-container")
       );
   }
+}
+
+var clearSearch = () => {
+  setTimeout(clearResults, 300);
+};
+
+var search = event => {
+  if (event.keyCode != 13) {
+    return;
+  }
+
+  clearResults();
 
   let resultsContainer = document.createElement("div");
   resultsContainer.setAttribute("id", "search-results-container");
-  resultsContainer.setAttribute(
-    "style",
-    `
-    position: absolute;
-    bottom: 3em;
-    z-index: 9999;
-    width: 500px;
-    min-height: 20px;
-    background-color: #fff;
-    border: 1px solid #333;
-    border-radius: 5px;
-    box-shadow: 2px 2px rgba(0,0,0,0.3);
-    padding: 0.5em;
-    `
-  );
 
   let searchTerm = searchInput.value;
 
