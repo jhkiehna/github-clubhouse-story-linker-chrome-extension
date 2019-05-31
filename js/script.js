@@ -147,12 +147,6 @@ var injectButton = () => {
  * Alternatively, use `onAjaxedPagesRaw` if your callback needs to be called at every page
  * change (e.g. to "unmount" a feature / listener) regardless of of *newness* of the page.
  */
-document.addEventListener(
-  "pjax:end",
-  () => {
-    injectButton();
-  },
-  false
-);
+document.addEventListener("pjax:end", injectButton, false);
 
 injectButton();
