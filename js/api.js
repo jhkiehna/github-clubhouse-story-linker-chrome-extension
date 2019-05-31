@@ -58,7 +58,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if (request.contentScriptQuery == "checkToken") {
     chrome.storage.sync.get(["clubhouseToken"], item => {
       if (item.clubhouseToken) {
-        sendResponse("There is a token Saved! You can replace it anytime.");
+        sendResponse("There is a token Saved!\nYou can replace it anytime.");
       }
       sendResponse("No token saved");
     });

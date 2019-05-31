@@ -7,19 +7,10 @@ apiTokenField.addEventListener(
       return;
     }
 
-    let existingMessage = document.querySelector("#message");
-    if (existingMessage) {
-      existingMessage.parentNode.removeChild(existingMessage);
-    }
-
     chrome.runtime.sendMessage(
       { contentScriptQuery: "setToken", token: event.target.value },
       response => {
-        let message = document.createElement("p");
-        message.setAttribute("id", "message");
-        message.innerText = response;
-
-        apiTokenField.parentNode.appendChild(message);
+        document.querySelector("#api-message").innerText = response;
       }
     );
   },
@@ -27,14 +18,5 @@ apiTokenField.addEventListener(
 );
 
 chrome.runtime.sendMessage({ contentScriptQuery: "checkToken" }, response => {
-  let existingMessage = document.querySelector("#message");
-  if (existingMessage) {
-    existingMessage.parentNode.removeChild(existingMessage);
-  }
-
-  let message = document.createElement("p");
-  message.setAttribute("id", "message");
-  message.innerText = response;
-
-  apiTokenField.parentNode.appendChild(message);
+  document.querySelector("#api-message").innerText = response;
 });
