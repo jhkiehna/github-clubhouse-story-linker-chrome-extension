@@ -4,19 +4,9 @@
   padding-bottom: 0.5em;
 }
 
-#clubhouse-search-button {
-  display: block;
-  padding: 1em 2em;
-  border-radius: 5px;
-  margin-left: auto;
-  margin-right: auto;
-  color: #fff;
-  background-color: #463460;
-}
-
 #search-input-box {
   border-radius: 3px;
-  border: 1px solid #d1d5da;
+  border: 2px solid #463460;
   box-shadow: inset 0 1px 2px rgba(27, 31, 35, 0.075);
   width: 100%;
   margin-top: 0.5em;

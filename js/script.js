@@ -1,16 +1,11 @@
 let buttonContainer = document.createElement("div");
 buttonContainer.setAttribute("id", "clubhouse-button-container");
 
-let searchButton = document.createElement("button");
-searchButton.setAttribute("type", "button");
-searchButton.setAttribute("id", "clubhouse-search-button");
-searchButton.innerText = "Search for Clubhouse Issues";
-buttonContainer.appendChild(searchButton);
-
 let searchInput = document.createElement("input");
 searchInput.setAttribute("id", "search-input-box");
 searchInput.setAttribute("type", "text");
 searchInput.setAttribute("placeholder", "Search for clubhouse story");
+buttonContainer.appendChild(searchInput);
 
 var pasteResult = event => {
   let targetTextArea =
@@ -86,17 +81,7 @@ var search = event => {
   }
 };
 
-var displaySearchField = () => {
-  buttonContainer.appendChild(searchInput);
-  searchInput.focus();
-
-  searchInput.addEventListener("blur", clearSearch, false);
-  searchInput.addEventListener("keypress", search, false);
-
-  searchButton.parentNode.removeChild(searchButton);
-};
-
-var injectButton = () => {
+var injectSearchField = () => {
   let targetTextArea =
     document.querySelector("#new_comment_field") ||
     document.querySelector("#pull_request_body");
@@ -106,7 +91,8 @@ var injectButton = () => {
     !document.querySelector("#clubhouse-button-container")
   ) {
     targetTextArea.parentNode.insertBefore(buttonContainer, targetTextArea);
-    searchButton.addEventListener("click", displaySearchField, false);
+    searchInput.addEventListener("blur", clearSearch, false);
+    searchInput.addEventListener("keypress", search, false);
   }
 };
 
@@ -118,6 +104,6 @@ var injectButton = () => {
  * Alternatively, use `onAjaxedPagesRaw` if your callback needs to be called at every page
  * change (e.g. to "unmount" a feature / listener) regardless of of *newness* of the page.
  */
-document.addEventListener("pjax:end", injectButton, false);
+document.addEventListener("pjax:end", injectSearchField, false);
 
-injectButton();
+injectSearchField();
