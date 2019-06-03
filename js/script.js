@@ -101,7 +101,10 @@ var injectButton = () => {
     document.querySelector("#new_comment_field") ||
     document.querySelector("#pull_request_body");
 
-  if (targetTextArea) {
+  if (
+    targetTextArea &&
+    !document.querySelector("#clubhouse-button-container")
+  ) {
     targetTextArea.parentNode.insertBefore(buttonContainer, targetTextArea);
     searchButton.addEventListener("click", displaySearchField, false);
   }
