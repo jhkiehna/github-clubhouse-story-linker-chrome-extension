@@ -7,6 +7,9 @@ searchInput.setAttribute("type", "text");
 searchInput.setAttribute("placeholder", "Search for clubhouse story");
 buttonContainer.appendChild(searchInput);
 
+$RESULTS_CACHE = [];
+$PREVIOUS_SEARCH = null;
+
 var pasteResult = event => {
   let targetTextArea =
     document.querySelector("#new_comment_field") ||
@@ -42,17 +45,30 @@ var search = event => {
   }
 
   clearResults();
-
-  let resultsContainer = document.createElement("div");
-  resultsContainer.setAttribute("id", "search-results-container");
-
   let searchTerm = searchInput.value;
 
-  if (searchTerm) {
+  if ($RESULTS_CACHE.length && $PREVIOUS_SEARCH === searchInput.value) {
+    let resultsContainer = document.createElement("div");
+    resultsContainer.setAttribute("id", "search-results-container");
+
+    $RESULTS_CACHE.forEach(element => {
+      let divider = document.createElement("hr");
+      resultsContainer.appendChild(element);
+      resultsContainer.appendChild(divider);
+    });
+
+    searchInput.parentNode.appendChild(resultsContainer);
+  } else if (searchTerm) {
+    let resultsContainer = document.createElement("div");
+    resultsContainer.setAttribute("id", "search-results-container");
+
     chrome.runtime.sendMessage(
       { contentScriptQuery: "fetchStories", searchTerm: searchTerm },
       response => {
-        response.data.slice(0, 10).forEach(story => {
+        $PREVIOUS_SEARCH = searchTerm;
+        $RESULTS_CACHE = [];
+
+        response.data.forEach(story => {
           chrome.runtime.sendMessage(
             {
               contentScriptQuery: "fetchProject",
@@ -66,6 +82,7 @@ var search = event => {
               element.addEventListener("click", pasteResult, false);
 
               element.innerText = story.name + " - " + response.name;
+              $RESULTS_CACHE.push(element);
 
               resultsContainer.appendChild(element);
               resultsContainer.appendChild(divider);

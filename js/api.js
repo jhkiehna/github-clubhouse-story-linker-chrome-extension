@@ -8,10 +8,11 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       fetch(
         `${CLUBHOUSE_API}/search/stories?token=${CLUBHOUSE_API_TOKEN}&query=${
           request.searchTerm
-        }`
+        }&page_size=25`
       )
         .then(res => res.json())
         .then(json => {
+          console.log(json);
           sendResponse(json);
         })
         .catch(error => {
