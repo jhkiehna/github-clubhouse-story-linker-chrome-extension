@@ -10,6 +10,19 @@ buttonContainer.appendChild(searchInput);
 $RESULTS_CACHE = [];
 $PREVIOUS_SEARCH = null;
 
+var displayCachedResults = () => {
+  if ($RESULTS_CACHE.length && $PREVIOUS_SEARCH === searchInput.value) {
+    let resultsContainer = document.createElement("div");
+    resultsContainer.setAttribute("id", "search-results-container");
+
+    $RESULTS_CACHE.forEach(element => {
+      resultsContainer.appendChild(element);
+    });
+
+    searchInput.parentNode.appendChild(resultsContainer);
+  }
+};
+
 var pasteResult = event => {
   let targetTextArea =
     document.querySelector("#new_comment_field") ||
@@ -48,16 +61,7 @@ var search = event => {
   let searchTerm = searchInput.value;
 
   if ($RESULTS_CACHE.length && $PREVIOUS_SEARCH === searchInput.value) {
-    let resultsContainer = document.createElement("div");
-    resultsContainer.setAttribute("id", "search-results-container");
-
-    $RESULTS_CACHE.forEach(element => {
-      let divider = document.createElement("hr");
-      resultsContainer.appendChild(element);
-      resultsContainer.appendChild(divider);
-    });
-
-    searchInput.parentNode.appendChild(resultsContainer);
+    displayCachedResults();
   } else if (searchTerm) {
     let resultsContainer = document.createElement("div");
     resultsContainer.setAttribute("id", "search-results-container");
@@ -76,18 +80,15 @@ var search = event => {
             },
             response => {
               let element = document.createElement("a");
-              let divider = document.createElement("hr");
               element.setAttribute("style", "cursor: pointer");
               element.setAttribute("id", `ch${story.id}`);
+              element.setAttribute("class", "search-result");
               element.addEventListener("click", pasteResult, false);
 
               element.innerText = story.name + " - " + response.name;
               $RESULTS_CACHE.push(element);
 
               resultsContainer.appendChild(element);
-              resultsContainer.appendChild(divider);
-
-              searchInput.parentNode.appendChild(resultsContainer);
             }
           );
         });
@@ -110,6 +111,7 @@ var injectSearchField = () => {
     targetTextArea.parentNode.insertBefore(buttonContainer, targetTextArea);
     searchInput.addEventListener("blur", clearSearch, false);
     searchInput.addEventListener("keypress", search, false);
+    searchInput.addEventListener("focus", displayCachedResults, false);
   }
 };
 
