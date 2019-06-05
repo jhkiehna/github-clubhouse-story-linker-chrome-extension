@@ -115,30 +115,42 @@ var search = () => {
         $CACHE.search_term = searchTerm;
         $CACHE.results = [];
 
-        if (response.data.length) {
-          response.data.forEach(story => {
-            chrome.runtime.sendMessage(
-              {
-                contentScriptQuery: "fetchProject",
-                projectId: story.project_id
-              },
-              messageResponse => {
-                let element = document.createElement("a");
-                element.setAttribute("style", "cursor: pointer");
-                element.setAttribute("id", `ch${story.id}`);
-                element.setAttribute("class", "search-result");
-                element.addEventListener("click", pasteResult, false);
+        console.log(response);
 
-                element.innerText = story.name + " - " + messageResponse.name;
-                $CACHE.results.push(element);
+        if (response.data) {
+          if (response.data.length) {
+            response.data.forEach(story => {
+              chrome.runtime.sendMessage(
+                {
+                  contentScriptQuery: "fetchProject",
+                  projectId: story.project_id
+                },
+                messageResponse => {
+                  let element = document.createElement("a");
+                  element.setAttribute("style", "cursor: pointer");
+                  element.setAttribute("id", `ch${story.id}`);
+                  element.setAttribute("class", "search-result");
+                  element.addEventListener("click", pasteResult, false);
 
-                resultsContainer.appendChild(element);
-              }
-            );
-          });
+                  element.innerText = story.name + " - " + messageResponse.name;
+                  $CACHE.results.push(element);
+
+                  resultsContainer.appendChild(element);
+                }
+              );
+            });
+          } else {
+            let element = document.createElement("p");
+            element.innerText = "Search returned no results";
+
+            resultsContainer.appendChild(element);
+          }
         } else {
           let element = document.createElement("p");
-          element.innerText = "Search returned no results";
+          element.innerText = response.message
+            ? response.message
+            : "An error occurred";
+
           resultsContainer.appendChild(element);
         }
 
