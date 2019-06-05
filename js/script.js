@@ -115,8 +115,6 @@ var search = () => {
         $CACHE.search_term = searchTerm;
         $CACHE.results = [];
 
-        console.log(response);
-
         if (response.data) {
           if (response.data.length) {
             response.data.forEach(story => {
