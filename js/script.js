@@ -44,9 +44,11 @@ var pasteResult = event => {
       targetTextArea.value =
         "[" + $CACHE.selected_element.getAttribute("id") + "]";
     }
-    document
-      .querySelector("#partial-new-comment-form-actions button")
-      .removeAttribute("disabled");
+
+    document.querySelector("#partial-new-comment-form-actions button") &&
+      document
+        .querySelector("#partial-new-comment-form-actions button")
+        .removeAttribute("disabled");
 
     clearResults();
   } else {
