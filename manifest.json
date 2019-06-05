@@ -1,8 +1,8 @@
 {
-  "name": "Clubhouse-Github Story Linker",
+  "name": "Github-Clubhouse Story Linker",
   "manifest_version": 2,
   "version": "1.0",
-  "description": "Description.",
+  "description": "Allows you to easily search for Clubhouse stories from Github and link them to pull requests. A search field will be inserted into the Github comment fields on pull requests.",
   "browser_action": {
     "default_icon": "images/icon.png",
     "default_popup": "popup.html"
