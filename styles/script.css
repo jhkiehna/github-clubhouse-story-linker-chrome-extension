@@ -44,3 +44,12 @@
   text-decoration: none;
   background-color: lightgray;
 }
+
+.search-result-selected {
+  display: block;
+  color: black;
+  text-decoration: none;
+  padding: 1em 0 1em 0.25em;
+  border-bottom: 1px solid gray;
+  background-color: lightgray;
+}

@@ -9,6 +9,8 @@ buttonContainer.appendChild(searchInput);
 
 $RESULTS_CACHE = [];
 $PREVIOUS_SEARCH = null;
+$SELECTOR_POSITION = 0;
+$SELECTED_ELEMENT = null;
 
 var displayCachedResults = () => {
   if ($RESULTS_CACHE.length && $PREVIOUS_SEARCH === searchInput.value) {
@@ -29,16 +31,25 @@ var pasteResult = event => {
     document.querySelector("#pull_request_body");
 
   if (targetTextArea) {
-    targetTextArea.value = "[" + event.target.getAttribute("id") + "]";
+    if (event) {
+      targetTextArea.value = "[" + event.target.getAttribute("id") + "]";
+    } else {
+      targetTextArea.value = "[" + $SELECTED_ELEMENT.getAttribute("id") + "]";
+    }
     document
       .querySelector("#partial-new-comment-form-actions button")
       .removeAttribute("disabled");
+
+    clearResults();
   } else {
     console.log("Can't find text area");
   }
 };
 
 function clearResults() {
+  $SELECTOR_POSITION = 0;
+  $SELECTED_ELEMENT && $SELECTED_ELEMENT.setAttribute("class", "search-result");
+  $SELECTED_ELEMENT = null;
   while (document.querySelector("#search-results-container")) {
     document
       .querySelector("#search-results-container")
@@ -52,11 +63,37 @@ var clearSearch = () => {
   setTimeout(clearResults, 300);
 };
 
-var search = event => {
-  if (event.keyCode != 13) {
-    return;
+var select = keyCode => {
+  let resultsContainer = document.querySelector("#search-results-container");
+  let totalElements = resultsContainer.children.length;
+
+  let previousSelectedElement = resultsContainer.children[$SELECTOR_POSITION];
+  previousSelectedElement.setAttribute("class", "search-result");
+
+  if (keyCode == 38) {
+    if ($SELECTED_ELEMENT) {
+      $SELECTOR_POSITION--;
+    }
+    if ($SELECTOR_POSITION < 0) {
+      $SELECTOR_POSITION = totalElements - 1;
+    }
   }
 
+  if (keyCode == 40) {
+    if ($SELECTED_ELEMENT) {
+      $SELECTOR_POSITION++;
+    }
+    if ($SELECTOR_POSITION > totalElements - 1) {
+      $SELECTOR_POSITION = 0;
+    }
+  }
+
+  $SELECTED_ELEMENT = resultsContainer.children[$SELECTOR_POSITION];
+  $SELECTED_ELEMENT.setAttribute("class", "search-result-selected");
+  $SELECTED_ELEMENT.parentNode.scrollTop = $SELECTED_ELEMENT.offsetTop;
+};
+
+var search = () => {
   clearResults();
   let searchTerm = searchInput.value;
 
@@ -72,20 +109,20 @@ var search = event => {
         $PREVIOUS_SEARCH = searchTerm;
         $RESULTS_CACHE = [];
 
-        response.data.forEach(story => {
+        response.data.forEach((story, index) => {
           chrome.runtime.sendMessage(
             {
               contentScriptQuery: "fetchProject",
               projectId: story.project_id
             },
-            response => {
+            messageResponse => {
               let element = document.createElement("a");
               element.setAttribute("style", "cursor: pointer");
               element.setAttribute("id", `ch${story.id}`);
               element.setAttribute("class", "search-result");
               element.addEventListener("click", pasteResult, false);
 
-              element.innerText = story.name + " - " + response.name;
+              element.innerText = story.name + " - " + messageResponse.name;
               $RESULTS_CACHE.push(element);
 
               resultsContainer.appendChild(element);
@@ -94,8 +131,27 @@ var search = event => {
         });
 
         searchInput.parentNode.appendChild(resultsContainer);
+        resultsContainer.scrollIntoView({ block: "center" });
       }
     );
+  }
+};
+
+var keyHandler = event => {
+  if (document.querySelector("#search-results-container")) {
+    if (event.keyCode == 38 || event.keyCode == 40) {
+      event.preventDefault();
+      select(event.keyCode);
+    }
+  }
+
+  if (event.keyCode == 13) {
+    event.preventDefault();
+    if ($SELECTED_ELEMENT) {
+      pasteResult();
+    } else {
+      search();
+    }
   }
 };
 
@@ -110,8 +166,8 @@ var injectSearchField = () => {
   ) {
     targetTextArea.parentNode.insertBefore(buttonContainer, targetTextArea);
     searchInput.addEventListener("blur", clearSearch, false);
-    searchInput.addEventListener("keypress", search, false);
     searchInput.addEventListener("focus", displayCachedResults, false);
+    searchInput.addEventListener("keydown", keyHandler, false);
   }
 };
 
