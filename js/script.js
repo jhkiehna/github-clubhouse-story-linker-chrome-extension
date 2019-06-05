@@ -1,3 +1,10 @@
+const $CACHE = {
+  results: [],
+  search_term: null,
+  selector_position: 0,
+  selected_element: null
+};
+
 let buttonContainer = document.createElement("div");
 buttonContainer.setAttribute("id", "clubhouse-button-container");
 
@@ -7,17 +14,12 @@ searchInput.setAttribute("type", "text");
 searchInput.setAttribute("placeholder", "Search for clubhouse story");
 buttonContainer.appendChild(searchInput);
 
-$RESULTS_CACHE = [];
-$PREVIOUS_SEARCH = null;
-$SELECTOR_POSITION = 0;
-$SELECTED_ELEMENT = null;
-
 var displayCachedResults = () => {
-  if ($RESULTS_CACHE.length && $PREVIOUS_SEARCH === searchInput.value) {
+  if ($CACHE.results.length && $CACHE.search_term === searchInput.value) {
     let resultsContainer = document.createElement("div");
     resultsContainer.setAttribute("id", "search-results-container");
 
-    $RESULTS_CACHE.forEach(element => {
+    $CACHE.results.forEach(element => {
       resultsContainer.appendChild(element);
     });
 
@@ -34,7 +36,8 @@ var pasteResult = event => {
     if (event) {
       targetTextArea.value = "[" + event.target.getAttribute("id") + "]";
     } else {
-      targetTextArea.value = "[" + $SELECTED_ELEMENT.getAttribute("id") + "]";
+      targetTextArea.value =
+        "[" + $CACHE.selected_element.getAttribute("id") + "]";
     }
     document
       .querySelector("#partial-new-comment-form-actions button")
@@ -47,9 +50,10 @@ var pasteResult = event => {
 };
 
 function clearResults() {
-  $SELECTOR_POSITION = 0;
-  $SELECTED_ELEMENT && $SELECTED_ELEMENT.setAttribute("class", "search-result");
-  $SELECTED_ELEMENT = null;
+  $CACHE.selector_position = 0;
+  $CACHE.selected_element &&
+    $CACHE.selected_element.setAttribute("class", "search-result");
+  $CACHE.selected_element = null;
   while (document.querySelector("#search-results-container")) {
     document
       .querySelector("#search-results-container")
@@ -67,37 +71,39 @@ var select = keyCode => {
   let resultsContainer = document.querySelector("#search-results-container");
   let totalElements = resultsContainer.children.length;
 
-  let previousSelectedElement = resultsContainer.children[$SELECTOR_POSITION];
+  let previousSelectedElement =
+    resultsContainer.children[$CACHE.selector_position];
   previousSelectedElement.setAttribute("class", "search-result");
 
   if (keyCode == 38) {
-    if ($SELECTED_ELEMENT) {
-      $SELECTOR_POSITION--;
+    if ($CACHE.selected_element) {
+      $CACHE.selector_position--;
     }
-    if ($SELECTOR_POSITION < 0) {
-      $SELECTOR_POSITION = totalElements - 1;
+    if ($CACHE.selector_position < 0) {
+      $CACHE.selector_position = totalElements - 1;
     }
   }
 
   if (keyCode == 40) {
-    if ($SELECTED_ELEMENT) {
-      $SELECTOR_POSITION++;
+    if ($CACHE.selected_element) {
+      $CACHE.selector_position++;
     }
-    if ($SELECTOR_POSITION > totalElements - 1) {
-      $SELECTOR_POSITION = 0;
+    if ($CACHE.selector_position > totalElements - 1) {
+      $CACHE.selector_position = 0;
     }
   }
 
-  $SELECTED_ELEMENT = resultsContainer.children[$SELECTOR_POSITION];
-  $SELECTED_ELEMENT.setAttribute("class", "search-result-selected");
-  $SELECTED_ELEMENT.parentNode.scrollTop = $SELECTED_ELEMENT.offsetTop;
+  $CACHE.selected_element = resultsContainer.children[$CACHE.selector_position];
+  $CACHE.selected_element.setAttribute("class", "search-result-selected");
+  $CACHE.selected_element.parentNode.scrollTop =
+    $CACHE.selected_element.offsetTop;
 };
 
 var search = () => {
   clearResults();
   let searchTerm = searchInput.value;
 
-  if ($RESULTS_CACHE.length && $PREVIOUS_SEARCH === searchInput.value) {
+  if ($CACHE.results.length && $CACHE.search_term === searchInput.value) {
     displayCachedResults();
   } else if (searchTerm) {
     let resultsContainer = document.createElement("div");
@@ -106,8 +112,8 @@ var search = () => {
     chrome.runtime.sendMessage(
       { contentScriptQuery: "fetchStories", searchTerm: searchTerm },
       response => {
-        $PREVIOUS_SEARCH = searchTerm;
-        $RESULTS_CACHE = [];
+        $CACHE.search_term = searchTerm;
+        $CACHE.results = [];
 
         response.data.forEach((story, index) => {
           chrome.runtime.sendMessage(
@@ -123,7 +129,7 @@ var search = () => {
               element.addEventListener("click", pasteResult, false);
 
               element.innerText = story.name + " - " + messageResponse.name;
-              $RESULTS_CACHE.push(element);
+              $CACHE.results.push(element);
 
               resultsContainer.appendChild(element);
             }
@@ -147,7 +153,7 @@ var keyHandler = event => {
 
   if (event.keyCode == 13) {
     event.preventDefault();
-    if ($SELECTED_ELEMENT) {
+    if ($CACHE.selected_element) {
       pasteResult();
     } else {
       search();
