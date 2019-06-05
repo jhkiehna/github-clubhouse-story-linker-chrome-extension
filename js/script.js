@@ -14,17 +14,22 @@ searchInput.setAttribute("type", "text");
 searchInput.setAttribute("placeholder", "Search for clubhouse story");
 buttonContainer.appendChild(searchInput);
 
-var displayCachedResults = () => {
-  if ($CACHE.results.length && $CACHE.search_term === searchInput.value) {
-    let resultsContainer = document.createElement("div");
-    resultsContainer.setAttribute("id", "search-results-container");
-
-    $CACHE.results.forEach(element => {
-      resultsContainer.appendChild(element);
-    });
-
-    searchInput.parentNode.appendChild(resultsContainer);
+function clearResults() {
+  $CACHE.selector_position = 0;
+  $CACHE.selected_element &&
+    $CACHE.selected_element.setAttribute("class", "search-result");
+  $CACHE.selected_element = null;
+  while (document.querySelector("#search-results-container")) {
+    document
+      .querySelector("#search-results-container")
+      .parentNode.removeChild(
+        document.querySelector("#search-results-container")
+      );
   }
+}
+
+var clearSearch = () => {
+  setTimeout(clearResults, 300);
 };
 
 var pasteResult = event => {
@@ -49,25 +54,7 @@ var pasteResult = event => {
   }
 };
 
-function clearResults() {
-  $CACHE.selector_position = 0;
-  $CACHE.selected_element &&
-    $CACHE.selected_element.setAttribute("class", "search-result");
-  $CACHE.selected_element = null;
-  while (document.querySelector("#search-results-container")) {
-    document
-      .querySelector("#search-results-container")
-      .parentNode.removeChild(
-        document.querySelector("#search-results-container")
-      );
-  }
-}
-
-var clearSearch = () => {
-  setTimeout(clearResults, 300);
-};
-
-var select = keyCode => {
+function select(keyCode) {
   let resultsContainer = document.querySelector("#search-results-container");
   let totalElements = resultsContainer.children.length;
 
@@ -97,7 +84,20 @@ var select = keyCode => {
   $CACHE.selected_element.setAttribute("class", "search-result-selected");
   $CACHE.selected_element.parentNode.scrollTop =
     $CACHE.selected_element.offsetTop;
-};
+}
+
+function displayCachedResults() {
+  if ($CACHE.results.length && $CACHE.search_term === searchInput.value) {
+    let resultsContainer = document.createElement("div");
+    resultsContainer.setAttribute("id", "search-results-container");
+
+    $CACHE.results.forEach(element => {
+      resultsContainer.appendChild(element);
+    });
+
+    searchInput.parentNode.appendChild(resultsContainer);
+  }
+}
 
 var search = () => {
   clearResults();
@@ -115,7 +115,7 @@ var search = () => {
         $CACHE.search_term = searchTerm;
         $CACHE.results = [];
 
-        response.data.forEach((story, index) => {
+        response.data.forEach(story => {
           chrome.runtime.sendMessage(
             {
               contentScriptQuery: "fetchProject",
