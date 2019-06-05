@@ -115,26 +115,32 @@ var search = () => {
         $CACHE.search_term = searchTerm;
         $CACHE.results = [];
 
-        response.data.forEach(story => {
-          chrome.runtime.sendMessage(
-            {
-              contentScriptQuery: "fetchProject",
-              projectId: story.project_id
-            },
-            messageResponse => {
-              let element = document.createElement("a");
-              element.setAttribute("style", "cursor: pointer");
-              element.setAttribute("id", `ch${story.id}`);
-              element.setAttribute("class", "search-result");
-              element.addEventListener("click", pasteResult, false);
+        if (response.data.length) {
+          response.data.forEach(story => {
+            chrome.runtime.sendMessage(
+              {
+                contentScriptQuery: "fetchProject",
+                projectId: story.project_id
+              },
+              messageResponse => {
+                let element = document.createElement("a");
+                element.setAttribute("style", "cursor: pointer");
+                element.setAttribute("id", `ch${story.id}`);
+                element.setAttribute("class", "search-result");
+                element.addEventListener("click", pasteResult, false);
 
-              element.innerText = story.name + " - " + messageResponse.name;
-              $CACHE.results.push(element);
+                element.innerText = story.name + " - " + messageResponse.name;
+                $CACHE.results.push(element);
 
-              resultsContainer.appendChild(element);
-            }
-          );
-        });
+                resultsContainer.appendChild(element);
+              }
+            );
+          });
+        } else {
+          let element = document.createElement("p");
+          element.innerText = "Search returned no results";
+          resultsContainer.appendChild(element);
+        }
 
         searchInput.parentNode.appendChild(resultsContainer);
         resultsContainer.scrollIntoView({ block: "center" });
