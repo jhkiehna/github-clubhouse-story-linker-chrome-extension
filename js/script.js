@@ -29,7 +29,7 @@ function clearResults() {
 }
 
 var clearSearch = () => {
-  setTimeout(clearResults, 300);
+  setTimeout(clearResults, 100);
 };
 
 var pasteResult = event => {
