@@ -37,13 +37,37 @@ var pasteResult = event => {
     document.querySelector("#new_comment_field") ||
     document.querySelector("#pull_request_body");
 
+  while (document.querySelector("#story-link")) {
+    searchInput.parentNode.removeChild(document.querySelector("#story-link"));
+  }
+
+  let storyLink = document.createElement("a");
+  storyLink.setAttribute("id", "story-link");
+  storyLink.setAttribute("target", "_blank");
+  storyLink.setAttribute("rel", "noopener noreferrer");
+
   if (targetTextArea) {
     if (event) {
       targetTextArea.value = "[" + event.target.getAttribute("id") + "]";
+
+      storyLink.setAttribute("href", event.target.getAttribute("data-app-url"));
+      storyLink.innerText = `Link to Story ${event.target.getAttribute(
+        "id"
+      )} - ${event.target.getAttribute("data-story-name")}`;
     } else {
       targetTextArea.value =
         "[" + $CACHE.selected_element.getAttribute("id") + "]";
+
+      storyLink.setAttribute(
+        "href",
+        $CACHE.selected_element.getAttribute("data-app-url")
+      );
+      storyLink.innerText = `Link to Story ${$CACHE.selected_element.getAttribute(
+        "id"
+      )} - ${$CACHE.selected_element.getAttribute("data-story-name")}`;
     }
+
+    searchInput.parentNode.appendChild(storyLink);
 
     document.querySelector("#partial-new-comment-form-actions button") &&
       document
@@ -125,14 +149,16 @@ var search = () => {
                   contentScriptQuery: "fetchProject",
                   projectId: story.project_id
                 },
-                messageResponse => {
+                projectResponse => {
                   let element = document.createElement("a");
                   element.setAttribute("style", "cursor: pointer");
                   element.setAttribute("id", `ch${story.id}`);
+                  element.setAttribute("data-app-url", `${story.app_url}`);
+                  element.setAttribute("data-story-name", `${story.name}`);
                   element.setAttribute("class", "search-result");
                   element.addEventListener("click", pasteResult, false);
 
-                  element.innerText = story.name + " - " + messageResponse.name;
+                  element.innerText = story.name + " - " + projectResponse.name;
                   $CACHE.results.push(element);
 
                   resultsContainer.appendChild(element);
