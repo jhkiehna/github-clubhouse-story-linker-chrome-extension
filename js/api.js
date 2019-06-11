@@ -41,8 +41,6 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         .catch(error => {
           console.log(error);
         });
-
-      console.log(stories);
     });
 
     return true;

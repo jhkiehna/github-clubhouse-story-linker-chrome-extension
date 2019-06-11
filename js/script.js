@@ -5,14 +5,14 @@ const $CACHE = {
   selected_element: null
 };
 
-let buttonContainer = document.createElement("div");
-buttonContainer.setAttribute("id", "clubhouse-button-container");
+let searchContainer = document.createElement("div");
+searchContainer.setAttribute("id", "clubhouse-search-container");
 
 let searchInput = document.createElement("input");
 searchInput.setAttribute("id", "search-input-box");
 searchInput.setAttribute("type", "text");
 searchInput.setAttribute("placeholder", "Search for clubhouse story");
-buttonContainer.appendChild(searchInput);
+searchContainer.appendChild(searchInput);
 
 function clearResults() {
   $CACHE.selector_position = 0;
@@ -205,57 +205,53 @@ var keyHandler = event => {
   }
 };
 
-function injectSearchField() {
+function linkExistingComments() {
+  let elements = [...document.querySelectorAll("td.js-comment-body p")];
+
+  elements
+    .filter(element => {
+      return element.innerText.match(/(ch\d*)/g).length;
+    })
+    .forEach(element => {
+      storyId = element.innerText.match(/(ch\d*)/g)[0].replace("ch", "");
+
+      chrome.runtime.sendMessage(
+        {
+          contentScriptQuery: "fetchStory",
+          storyId: storyId
+        },
+        storyResponse => {
+          console.log(storyResponse);
+          let storyLink = document.createElement("a");
+          storyLink.setAttribute("href", storyResponse.app_url);
+          storyLink.setAttribute("target", "_blank");
+          storyLink.setAttribute("rel", "noopener noreferrer");
+          storyLink.innerText = `Link to story ${storyResponse.id} - ${
+            storyResponse.name
+          }`;
+
+          element.parentNode.appendChild(storyLink);
+        }
+      );
+    });
+}
+
+function inject() {
   let targetTextArea =
     document.querySelector("#new_comment_field") ||
     document.querySelector("#pull_request_body");
 
   if (
     targetTextArea &&
-    !document.querySelector("#clubhouse-button-container")
+    !document.querySelector("#clubhouse-search-container")
   ) {
-    targetTextArea.parentNode.insertBefore(buttonContainer, targetTextArea);
+    linkExistingComments();
+
+    targetTextArea.parentNode.insertBefore(searchContainer, targetTextArea);
     searchInput.addEventListener("blur", clearSearch, false);
     searchInput.addEventListener("focus", displayCachedResults, false);
     searchInput.addEventListener("keydown", keyHandler, false);
   }
-}
-
-function linkExistingComments() {
-  console.log("linking");
-
-  let storyIds = [];
-
-  let elements = [...document.querySelectorAll("td.js-comment-body p")];
-
-  console.log(elements);
-
-  elements.filter(element => {
-    return element.innerText.matches(/(ch\d*)/g).length;
-  });
-
-  console.log(elements);
-
-  // chrome.runtime.sendMessage(
-  //   {
-  //     contentScriptQuery: "fetchStory",
-  //     storyId: story.project_id
-  //   },
-  //   projectResponse => {
-  //     let element = document.createElement("a");
-  //     element.setAttribute("style", "cursor: pointer");
-  //     element.setAttribute("id", `ch${story.id}`);
-  //     element.setAttribute("data-app-url", `${story.app_url}`);
-  //     element.setAttribute("data-story-name", `${story.name}`);
-  //     element.setAttribute("class", "search-result");
-  //     element.addEventListener("click", pasteResult, false);
-
-  //     element.innerText = story.name + " - " + projectResponse.name;
-  //     $CACHE.results.push(element);
-
-  //     resultsContainer.appendChild(element);
-  //   }
-  // );
 }
 
 /*
@@ -266,7 +262,6 @@ function linkExistingComments() {
  * Alternatively, use `onAjaxedPagesRaw` if your callback needs to be called at every page
  * change (e.g. to "unmount" a feature / listener) regardless of of *newness* of the page.
  */
-document.addEventListener("pjax:end", injectSearchField, false);
+document.addEventListener("pjax:end", inject, false);
 
-injectSearchField();
-// linkExistingComments();
+inject();
