@@ -29,7 +29,7 @@ function clearResults() {
 }
 
 var clearSearch = () => {
-  setTimeout(clearResults, 100);
+  setTimeout(clearResults, 200);
 };
 
 var pasteResult = event => {
@@ -136,7 +136,7 @@ var search = () => {
     resultsContainer.setAttribute("id", "search-results-container");
 
     chrome.runtime.sendMessage(
-      { contentScriptQuery: "fetchStories", searchTerm: searchTerm },
+      { contentScriptQuery: "searchStories", searchTerm: searchTerm },
       response => {
         $CACHE.search_term = searchTerm;
         $CACHE.results = [];
@@ -205,7 +205,7 @@ var keyHandler = event => {
   }
 };
 
-var injectSearchField = () => {
+function injectSearchField() {
   let targetTextArea =
     document.querySelector("#new_comment_field") ||
     document.querySelector("#pull_request_body");
@@ -219,7 +219,44 @@ var injectSearchField = () => {
     searchInput.addEventListener("focus", displayCachedResults, false);
     searchInput.addEventListener("keydown", keyHandler, false);
   }
-};
+}
+
+function linkExistingComments() {
+  console.log("linking");
+
+  let storyIds = [];
+
+  let elements = [...document.querySelectorAll("td.js-comment-body p")];
+
+  console.log(elements);
+
+  elements.filter(element => {
+    return element.innerText.matches(/(ch\d*)/g).length;
+  });
+
+  console.log(elements);
+
+  // chrome.runtime.sendMessage(
+  //   {
+  //     contentScriptQuery: "fetchStory",
+  //     storyId: story.project_id
+  //   },
+  //   projectResponse => {
+  //     let element = document.createElement("a");
+  //     element.setAttribute("style", "cursor: pointer");
+  //     element.setAttribute("id", `ch${story.id}`);
+  //     element.setAttribute("data-app-url", `${story.app_url}`);
+  //     element.setAttribute("data-story-name", `${story.name}`);
+  //     element.setAttribute("class", "search-result");
+  //     element.addEventListener("click", pasteResult, false);
+
+  //     element.innerText = story.name + " - " + projectResponse.name;
+  //     $CACHE.results.push(element);
+
+  //     resultsContainer.appendChild(element);
+  //   }
+  // );
+}
 
 /*
  * When navigating back and forth in history, GitHub will preserve the DOM changes;
@@ -232,3 +269,4 @@ var injectSearchField = () => {
 document.addEventListener("pjax:end", injectSearchField, false);
 
 injectSearchField();
+// linkExistingComments();

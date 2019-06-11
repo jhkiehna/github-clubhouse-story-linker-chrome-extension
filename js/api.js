@@ -1,7 +1,7 @@
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   let CLUBHOUSE_API = "https://api.clubhouse.io/api/v2";
 
-  if (request.contentScriptQuery == "fetchStories") {
+  if (request.contentScriptQuery == "searchStories") {
     chrome.storage.sync.get(["clubhouseToken"], item => {
       let CLUBHOUSE_API_TOKEN = item.clubhouseToken;
 
@@ -19,6 +19,30 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
           console.log(error);
           sendResponse(error);
         });
+    });
+
+    return true;
+  }
+
+  if (request.contentScriptQuery == "fetchStory") {
+    chrome.storage.sync.get(["clubhouseToken"], item => {
+      let CLUBHOUSE_API_TOKEN = item.clubhouseToken;
+
+      fetch(
+        `${CLUBHOUSE_API}/stories/${
+          request.storyId
+        }?token=${CLUBHOUSE_API_TOKEN}`
+      )
+        .then(res => res.json())
+        .then(json => {
+          console.log(json);
+          sendResponse(json);
+        })
+        .catch(error => {
+          console.log(error);
+        });
+
+      console.log(stories);
     });
 
     return true;
