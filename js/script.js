@@ -207,17 +207,15 @@ var keyHandler = event => {
 
 function linkExistingComments() {
   let elements = [...document.querySelectorAll("td.js-comment-body p")];
+  let regex = /(?<=^\[\w*\s*(ch))\d*\b/g;
 
   elements
     .filter(element => {
-      let matches = element.innerText.match(/(?<=^\[\w*\s*)ch\d*\b/g);
-      console.log(matches);
+      let matches = element.innerText.match(regex);
       return matches && matches.length ? true : false;
     })
     .forEach(element => {
-      storyId = element.innerText
-        .match(/(?<=^\[\w*\s*)ch\d*\b/g)[0]
-        .replace("ch", "");
+      storyId = element.innerText.match(regex)[0];
 
       chrome.runtime.sendMessage(
         {
