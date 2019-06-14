@@ -210,12 +210,14 @@ function linkExistingComments() {
 
   elements
     .filter(element => {
-      let matches = element.innerText.match(/ch\d*\b/g);
+      let matches = element.innerText.match(/(?<=^\[\w*\s*)ch\d*\b/g);
       console.log(matches);
       return matches && matches.length ? true : false;
     })
     .forEach(element => {
-      storyId = element.innerText.match(/ch\d*\b/g)[0].replace("ch", "");
+      storyId = element.innerText
+        .match(/(?<=^\[\w*\s*)ch\d*\b/g)[0]
+        .replace("ch", "");
 
       chrome.runtime.sendMessage(
         {
