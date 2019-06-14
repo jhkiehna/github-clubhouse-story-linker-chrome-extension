@@ -210,7 +210,8 @@ function linkExistingComments() {
 
   elements
     .filter(element => {
-      return element.innerText.match(/(ch\d*)/g).length;
+      let matches = element.innerText.match(/(ch\d*)/g);
+      return matches && matches.length ? true : false;
     })
     .forEach(element => {
       storyId = element.innerText.match(/(ch\d*)/g)[0].replace("ch", "");
