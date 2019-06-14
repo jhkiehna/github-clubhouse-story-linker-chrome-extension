@@ -210,17 +210,18 @@ function linkExistingComments() {
   let regex = /(?<=^\[\w*\s*(ch))\d*\b/g;
 
   elements
-    .filter(element => {
+    .map(element => {
       let matches = element.innerText.match(regex);
-      return matches && matches.length ? true : false;
+      return matches && matches.length
+        ? { storyId: matches[0], element: element }
+        : null;
     })
-    .forEach(element => {
-      storyId = element.innerText.match(regex)[0];
-
+    .filter(object => object !== null)
+    .forEach(object => {
       chrome.runtime.sendMessage(
         {
           contentScriptQuery: "fetchStory",
-          storyId: storyId
+          storyId: object.storyId
         },
         storyResponse => {
           let storyLink = document.createElement("a");
@@ -231,7 +232,7 @@ function linkExistingComments() {
             storyResponse.name
           }`;
 
-          element.parentNode.appendChild(storyLink);
+          object.element.parentNode.appendChild(storyLink);
         }
       );
     });
