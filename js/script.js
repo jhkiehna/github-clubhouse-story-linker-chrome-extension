@@ -210,11 +210,12 @@ function linkExistingComments() {
 
   elements
     .filter(element => {
-      let matches = element.innerText.match(/(ch\d*)/g);
+      let matches = element.innerText.match(/ch\d*\b/g);
+      console.log(matches);
       return matches && matches.length ? true : false;
     })
     .forEach(element => {
-      storyId = element.innerText.match(/(ch\d*)/g)[0].replace("ch", "");
+      storyId = element.innerText.match(/ch\d*\b/g)[0].replace("ch", "");
 
       chrome.runtime.sendMessage(
         {
@@ -222,7 +223,6 @@ function linkExistingComments() {
           storyId: storyId
         },
         storyResponse => {
-          console.log(storyResponse);
           let storyLink = document.createElement("a");
           storyLink.setAttribute("href", storyResponse.app_url);
           storyLink.setAttribute("target", "_blank");
