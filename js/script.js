@@ -5,14 +5,14 @@ const $CACHE = {
   selected_element: null
 };
 
-let buttonContainer = document.createElement("div");
-buttonContainer.setAttribute("id", "clubhouse-button-container");
+let searchContainer = document.createElement("div");
+searchContainer.setAttribute("id", "clubhouse-search-container");
 
 let searchInput = document.createElement("input");
 searchInput.setAttribute("id", "search-input-box");
 searchInput.setAttribute("type", "text");
 searchInput.setAttribute("placeholder", "Search for clubhouse story");
-buttonContainer.appendChild(searchInput);
+searchContainer.appendChild(searchInput);
 
 function clearResults() {
   $CACHE.selector_position = 0;
@@ -29,7 +29,7 @@ function clearResults() {
 }
 
 var clearSearch = () => {
-  setTimeout(clearResults, 300);
+  setTimeout(clearResults, 200);
 };
 
 var pasteResult = event => {
@@ -37,16 +37,42 @@ var pasteResult = event => {
     document.querySelector("#new_comment_field") ||
     document.querySelector("#pull_request_body");
 
+  while (document.querySelector("#story-link")) {
+    searchInput.parentNode.removeChild(document.querySelector("#story-link"));
+  }
+
+  let storyLink = document.createElement("a");
+  storyLink.setAttribute("id", "story-link");
+  storyLink.setAttribute("target", "_blank");
+  storyLink.setAttribute("rel", "noopener noreferrer");
+
   if (targetTextArea) {
     if (event) {
       targetTextArea.value = "[" + event.target.getAttribute("id") + "]";
+
+      storyLink.setAttribute("href", event.target.getAttribute("data-app-url"));
+      storyLink.innerText = `Link to Story ${event.target.getAttribute(
+        "id"
+      )} - ${event.target.getAttribute("data-story-name")}`;
     } else {
       targetTextArea.value =
         "[" + $CACHE.selected_element.getAttribute("id") + "]";
+
+      storyLink.setAttribute(
+        "href",
+        $CACHE.selected_element.getAttribute("data-app-url")
+      );
+      storyLink.innerText = `Link to Story ${$CACHE.selected_element.getAttribute(
+        "id"
+      )} - ${$CACHE.selected_element.getAttribute("data-story-name")}`;
     }
-    document
-      .querySelector("#partial-new-comment-form-actions button")
-      .removeAttribute("disabled");
+
+    searchInput.parentNode.appendChild(storyLink);
+
+    document.querySelector("#partial-new-comment-form-actions button") &&
+      document
+        .querySelector("#partial-new-comment-form-actions button")
+        .removeAttribute("disabled");
 
     clearResults();
   } else {
@@ -110,7 +136,7 @@ var search = () => {
     resultsContainer.setAttribute("id", "search-results-container");
 
     chrome.runtime.sendMessage(
-      { contentScriptQuery: "fetchStories", searchTerm: searchTerm },
+      { contentScriptQuery: "searchStories", searchTerm: searchTerm },
       response => {
         $CACHE.search_term = searchTerm;
         $CACHE.results = [];
@@ -123,14 +149,16 @@ var search = () => {
                   contentScriptQuery: "fetchProject",
                   projectId: story.project_id
                 },
-                messageResponse => {
+                projectResponse => {
                   let element = document.createElement("a");
                   element.setAttribute("style", "cursor: pointer");
                   element.setAttribute("id", `ch${story.id}`);
+                  element.setAttribute("data-app-url", `${story.app_url}`);
+                  element.setAttribute("data-story-name", `${story.name}`);
                   element.setAttribute("class", "search-result");
                   element.addEventListener("click", pasteResult, false);
 
-                  element.innerText = story.name + " - " + messageResponse.name;
+                  element.innerText = story.name + " - " + projectResponse.name;
                   $CACHE.results.push(element);
 
                   resultsContainer.appendChild(element);
@@ -177,21 +205,56 @@ var keyHandler = event => {
   }
 };
 
-var injectSearchField = () => {
+function linkExistingComments() {
+  let elements = [...document.querySelectorAll("td.js-comment-body p")];
+  let regex = /(?<=^\[\w*\s*(ch))\d*\b/g;
+
+  elements
+    .map(element => {
+      let matches = element.innerText.match(regex);
+      return matches && matches.length
+        ? { storyId: matches[0], element: element }
+        : null;
+    })
+    .filter(object => object !== null)
+    .forEach(object => {
+      chrome.runtime.sendMessage(
+        {
+          contentScriptQuery: "fetchStory",
+          storyId: object.storyId
+        },
+        storyResponse => {
+          let storyLink = document.createElement("a");
+          storyLink.setAttribute("href", storyResponse.app_url);
+          storyLink.setAttribute("target", "_blank");
+          storyLink.setAttribute("rel", "noopener noreferrer");
+          storyLink.innerText = `Link to story ${storyResponse.id} - ${
+            storyResponse.name
+          }`;
+
+          object.element.parentNode.appendChild(storyLink);
+        }
+      );
+    });
+}
+
+function inject() {
   let targetTextArea =
     document.querySelector("#new_comment_field") ||
     document.querySelector("#pull_request_body");
 
   if (
     targetTextArea &&
-    !document.querySelector("#clubhouse-button-container")
+    !document.querySelector("#clubhouse-search-container")
   ) {
-    targetTextArea.parentNode.insertBefore(buttonContainer, targetTextArea);
+    linkExistingComments();
+
+    targetTextArea.parentNode.insertBefore(searchContainer, targetTextArea);
     searchInput.addEventListener("blur", clearSearch, false);
     searchInput.addEventListener("focus", displayCachedResults, false);
     searchInput.addEventListener("keydown", keyHandler, false);
   }
-};
+}
 
 /*
  * When navigating back and forth in history, GitHub will preserve the DOM changes;
@@ -201,6 +264,6 @@ var injectSearchField = () => {
  * Alternatively, use `onAjaxedPagesRaw` if your callback needs to be called at every page
  * change (e.g. to "unmount" a feature / listener) regardless of of *newness* of the page.
  */
-document.addEventListener("pjax:end", injectSearchField, false);
+document.addEventListener("pjax:end", inject, false);
 
-injectSearchField();
+inject();
