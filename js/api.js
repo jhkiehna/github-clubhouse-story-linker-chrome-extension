@@ -1,6 +1,7 @@
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   let CLUBHOUSE_API = "https://api.clubhouse.io/api/v2";
 
+
   if (request.contentScriptQuery == "searchStories") {
     chrome.storage.sync.get(["clubhouseToken"], item => {
       let CLUBHOUSE_API_TOKEN = item.clubhouseToken;
