@@ -228,14 +228,16 @@ function linkExistingComments() {
           storyLink.setAttribute("href", storyResponse.app_url);
           storyLink.setAttribute("target", "_blank");
           storyLink.setAttribute("rel", "noopener noreferrer");
-          storyLink.innerText = `Link to story ${storyResponse.id} - ${
-            storyResponse.name
-          }`;
+          storyLink.innerText = `Link to story ${storyResponse.id} - ${storyResponse.name}`;
 
           object.element.parentNode.appendChild(storyLink);
         }
       );
     });
+}
+
+function searchProjects() {
+  console.log("searching projects");
 }
 
 function inject() {
@@ -248,6 +250,7 @@ function inject() {
     !document.querySelector("#clubhouse-search-container")
   ) {
     linkExistingComments();
+    searchProjects();
 
     targetTextArea.parentNode.insertBefore(searchContainer, targetTextArea);
     searchInput.addEventListener("blur", clearSearch, false);
