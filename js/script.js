@@ -259,11 +259,7 @@ function searchProjects() {
   chrome.runtime.sendMessage(
     { contentScriptQuery: "fetchProjects" },
     projectsResponse => {
-      if (!projectsResponse.length) {
-        let allOption = document.createElement("option");
-        allOption.innerText = projectResponse.message;
-        projectSelect.appendChild(allOption);
-      } else {
+      if (projectsResponse && projectsResponse.length) {
         let allOption = document.createElement("option");
         allOption.setAttribute("value", 0);
         allOption.innerText = "All";
@@ -275,7 +271,12 @@ function searchProjects() {
           thisOption.innerText = project.name;
           projectSelect.appendChild(thisOption);
         });
+        return;
       }
+
+      let errorOption = document.createElement("option");
+      errorOption.innerText = "Error: check token!";
+      projectSelect.appendChild(errorOption);
     }
   );
 }
