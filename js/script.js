@@ -2,7 +2,8 @@ const $CACHE = {
   results: [],
   search_term: null,
   selector_position: 0,
-  selected_element: null
+  selected_element: null,
+  current_project_filter: 0
 };
 
 let searchContainer = document.createElement("div");
@@ -13,6 +14,15 @@ searchInput.setAttribute("id", "search-input-box");
 searchInput.setAttribute("type", "text");
 searchInput.setAttribute("placeholder", "Search for clubhouse story");
 searchContainer.appendChild(searchInput);
+
+let projectSelect = document.createElement("select");
+projectSelect.setAttribute("id", "project-select-box");
+projectSelect.addEventListener("change", event => {
+  $CACHE.results = [];
+  $CACHE.searchTerm = null;
+  $CACHE.current_project_filter = event.target.value;
+});
+searchContainer.appendChild(projectSelect);
 
 function clearResults() {
   $CACHE.selector_position = 0;
@@ -136,7 +146,11 @@ var search = () => {
     resultsContainer.setAttribute("id", "search-results-container");
 
     chrome.runtime.sendMessage(
-      { contentScriptQuery: "searchStories", searchTerm: searchTerm },
+      {
+        contentScriptQuery: "searchStories",
+        searchTerm: searchTerm,
+        projectFilterId: $CACHE.current_project_filter
+      },
       response => {
         $CACHE.search_term = searchTerm;
         $CACHE.results = [];
@@ -157,8 +171,13 @@ var search = () => {
                   element.setAttribute("data-story-name", `${story.name}`);
                   element.setAttribute("class", "search-result");
                   element.addEventListener("click", pasteResult, false);
+                  element.innerText = story.name;
 
-                  element.innerText = story.name + " - " + projectResponse.name;
+                  let projectTag = document.createElement("span");
+                  projectTag.setAttribute("class", "result-project-tag");
+                  projectTag.innerText = projectResponse.name;
+                  element.appendChild(projectTag);
+
                   $CACHE.results.push(element);
 
                   resultsContainer.appendChild(element);
@@ -228,14 +247,38 @@ function linkExistingComments() {
           storyLink.setAttribute("href", storyResponse.app_url);
           storyLink.setAttribute("target", "_blank");
           storyLink.setAttribute("rel", "noopener noreferrer");
-          storyLink.innerText = `Link to story ${storyResponse.id} - ${
-            storyResponse.name
-          }`;
+          storyLink.innerText = `Link to story ${storyResponse.id} - ${storyResponse.name}`;
 
           object.element.parentNode.appendChild(storyLink);
         }
       );
     });
+}
+
+function searchProjects() {
+  chrome.runtime.sendMessage(
+    { contentScriptQuery: "fetchProjects" },
+    projectsResponse => {
+      if (projectsResponse && projectsResponse.length) {
+        let allOption = document.createElement("option");
+        allOption.setAttribute("value", 0);
+        allOption.innerText = "All";
+        projectSelect.appendChild(allOption);
+
+        projectsResponse.forEach(project => {
+          let thisOption = document.createElement("option");
+          thisOption.setAttribute("value", project.id);
+          thisOption.innerText = project.name;
+          projectSelect.appendChild(thisOption);
+        });
+        return;
+      }
+
+      let errorOption = document.createElement("option");
+      errorOption.innerText = "Error: check token!";
+      projectSelect.appendChild(errorOption);
+    }
+  );
 }
 
 function inject() {
@@ -248,6 +291,7 @@ function inject() {
     !document.querySelector("#clubhouse-search-container")
   ) {
     linkExistingComments();
+    searchProjects();
 
     targetTextArea.parentNode.insertBefore(searchContainer, targetTextArea);
     searchInput.addEventListener("blur", clearSearch, false);
