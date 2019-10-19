@@ -8,7 +8,6 @@
 }
 
 #search-input-box {
-  display: relative;
   width: 80%;
   border-radius: 3px;
   border: 2px solid #463460;
@@ -52,7 +51,7 @@
   font-size: 0.8rem;
   color: #222;
   text-decoration: none;
-  padding: 0.8em 0 0.8em 0.25em;
+  padding: 0.7em 0 0.7em 0.25em;
   border-bottom: 1px solid gray;
 }
 
@@ -64,7 +63,7 @@
 .search-result:hover {
   color: black;
   text-decoration: none;
-  background-color: lightgray;
+  background-color: #f5f5f5;
 }
 
 .search-result-selected {
@@ -73,5 +72,5 @@
   text-decoration: none;
   padding: 1em 0 1em 0.25em;
   border-bottom: 1px solid gray;
-  background-color: lightgray;
+  background-color: #f5f5f5;
 }

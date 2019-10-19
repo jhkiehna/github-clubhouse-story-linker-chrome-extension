@@ -261,7 +261,7 @@ function searchProjects() {
     projectsResponse => {
       if (!projectsResponse.length) {
         let allOption = document.createElement("option");
-        allOption.innerText = "Unauthorized";
+        allOption.innerText = projectResponse.message;
         projectSelect.appendChild(allOption);
       } else {
         let allOption = document.createElement("option");
