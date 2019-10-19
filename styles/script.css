@@ -67,7 +67,9 @@
 }
 
 .search-result-selected {
-  display: block;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
   color: black;
   text-decoration: none;
   padding: 1em 0 1em 0.25em;
