@@ -2,13 +2,19 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   let CLUBHOUSE_API = "https://api.clubhouse.io/api/v2";
 
   if (request.contentScriptQuery == "fetchProjects") {
-    chrome.storage.sync.get(["clubhouseToken"], item => {
+    chrome.storage.sync.get(["clubhouseToken", "filterProjectId"], item => {
       let CLUBHOUSE_API_TOKEN = item.clubhouseToken;
 
       fetch(`${CLUBHOUSE_API}/projects?token=${CLUBHOUSE_API_TOKEN}`)
         .then(res => res.json())
         .then(json => {
-          sendResponse(json);
+          let newJson = {};
+          newJson.data = json;
+          newJson.filterProjectId = item.filterProjectId
+            ? item.filterProjectId
+            : 0;
+
+          sendResponse(newJson);
         })
         .catch(error => {
           console.error(error);
@@ -20,12 +26,12 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   }
 
   if (request.contentScriptQuery == "searchStories") {
-    chrome.storage.sync.get(["clubhouseToken"], item => {
+    chrome.storage.sync.get(["clubhouseToken", "filterProjectId"], item => {
       let CLUBHOUSE_API_TOKEN = item.clubhouseToken;
       let queryString = request.searchTerm;
 
-      if (request.projectFilterId != 0) {
-        queryString += ` project:${request.projectFilterId}`;
+      if (item.filterProjectId && item.filterProjectId != 0) {
+        queryString += ` project:${item.filterProjectId}`;
       }
 
       fetch(
@@ -78,6 +84,14 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
           console.error(error);
           sendResponse(error);
         });
+    });
+
+    return true;
+  }
+
+  if (request.contentScriptQuery == "setProjectFilter") {
+    chrome.storage.sync.set({ filterProjectId: request.projectId }, () => {
+      sendResponse("Filter Project Id Saved");
     });
 
     return true;

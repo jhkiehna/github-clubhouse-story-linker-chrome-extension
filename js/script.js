@@ -2,8 +2,7 @@ const $CACHE = {
   results: [],
   search_term: null,
   selector_position: 0,
-  selected_element: null,
-  current_project_filter: 0
+  selected_element: null
 };
 
 let searchContainer = document.createElement("div");
@@ -17,11 +16,17 @@ searchContainer.appendChild(searchInput);
 
 let projectSelect = document.createElement("select");
 projectSelect.setAttribute("id", "project-select-box");
+
 projectSelect.addEventListener("change", event => {
   $CACHE.results = [];
   $CACHE.searchTerm = null;
-  $CACHE.current_project_filter = event.target.value;
+
+  chrome.runtime.sendMessage({
+    contentScriptQuery: "setProjectFilter",
+    projectId: event.target.value
+  });
 });
+
 searchContainer.appendChild(projectSelect);
 
 function clearResults() {
@@ -148,8 +153,7 @@ var search = () => {
     chrome.runtime.sendMessage(
       {
         contentScriptQuery: "searchStories",
-        searchTerm: searchTerm,
-        projectFilterId: $CACHE.current_project_filter
+        searchTerm: searchTerm
       },
       response => {
         $CACHE.search_term = searchTerm;
@@ -259,18 +263,49 @@ function searchProjects() {
   chrome.runtime.sendMessage(
     { contentScriptQuery: "fetchProjects" },
     projectsResponse => {
-      if (projectsResponse && projectsResponse.length) {
+      if (
+        projectsResponse &&
+        projectsResponse.data &&
+        projectsResponse.data.length
+      ) {
+        let projectIdFoundInList = false;
+
         let allOption = document.createElement("option");
         allOption.setAttribute("value", 0);
+
+        if (projectsResponse.filterProjectId == 0) {
+          allOption.setAttribute("selected", "");
+          projectIdFoundInList = true;
+        }
+
         allOption.innerText = "All";
         projectSelect.appendChild(allOption);
 
-        projectsResponse.forEach(project => {
-          let thisOption = document.createElement("option");
-          thisOption.setAttribute("value", project.id);
-          thisOption.innerText = project.name;
-          projectSelect.appendChild(thisOption);
+        projectsResponse.data.forEach(project => {
+          if (!project.archived) {
+            let thisOption = document.createElement("option");
+            thisOption.setAttribute("value", project.id);
+
+            if (projectsResponse.filterProjectId == project.id) {
+              thisOption.setAttribute("selected", "");
+              projectIdFoundInList = true;
+            }
+
+            thisOption.innerText = project.name;
+            projectSelect.appendChild(thisOption);
+          }
         });
+        if (!projectIdFoundInList) {
+          console.error(
+            "saved project ID not found in list returned from clubhouse. Resetting to 0."
+          );
+
+          chrome.runtime.sendMessage({
+            contentScriptQuery: "setProjectFilter",
+            projectId: 0
+          });
+        }
+
         return;
       }
 
